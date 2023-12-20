@@ -28,6 +28,7 @@ import javax.swing.JComponent;
 import docking.widgets.EventTrigger;
 import docking.widgets.fieldpanel.field.Field;
 import docking.widgets.fieldpanel.support.*;
+import ghidra.util.Msg;
 
 /**
  * Contains all the code for implementing the AccessibleFieldPanel which is an inner class in
@@ -105,6 +106,7 @@ public class AccessibleFieldPanelDelegate {
 			AccessibleTextSequence oldSequence = getAccessibleTextSequence(cursorField);
 			cursorLoc = newCursorLoc;
 			cursorField = getAccessibleField(newCursorLoc);
+			Msg.debug(this, "******cursor Field = " + cursorField);
 			AccessibleTextSequence newSequence = getAccessibleTextSequence(cursorField);
 			String oldDescription = description;
 			description = generateDescription();
@@ -125,6 +127,7 @@ public class AccessibleFieldPanelDelegate {
 		int newCaretPos = cursorField.getTextOffset(newCursorLoc.getRow(), newCursorLoc.getCol());
 		cursorField.setCaretPos(newCaretPos);
 		if (newCaretPos != caretPos && trigger == EventTrigger.GUI_ACTION) {
+			Msg.debug(this, "firePropertyChange");
 			context.firePropertyChange(ACCESSIBLE_CARET_PROPERTY, caretPos, newCaretPos);
 		}
 		caretPos = newCaretPos;
@@ -321,7 +324,7 @@ public class AccessibleFieldPanelDelegate {
 	 */
 	public Accessible getAccessibleAt(Point p) {
 		int result = Collections.binarySearch(accessibleLayouts, p.y, Comparator
-			.comparingInt(o -> o instanceof AccessibleLayout lh ? lh.getYpos() : (Integer) o));
+				.comparingInt(o -> o instanceof AccessibleLayout lh ? lh.getYpos() : (Integer) o));
 
 		if (result < 0) {
 			result = -result - 2;

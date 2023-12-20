@@ -15,7 +15,8 @@
  */
 package docking.widgets.fieldpanel;
 
-import static docking.widgets.EventTrigger.*;
+import static docking.widgets.EventTrigger.API_CALL;
+import static docking.widgets.EventTrigger.INTERNAL_ONLY;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -86,7 +87,6 @@ public class FieldPanel extends JPanel
 	private String name;
 
 	private FieldDescriptionProvider fieldDescriptionProvider;
-	private AccessibleFieldPanel accessibleFieldPanel;
 
 	public FieldPanel(LayoutModel model) {
 		this(model, "No Name");
@@ -151,8 +151,8 @@ public class FieldPanel extends JPanel
 
 	public void setFieldDescriptionProvider(FieldDescriptionProvider provider) {
 		fieldDescriptionProvider = provider;
-		if (accessibleFieldPanel != null) {
-			accessibleFieldPanel.setFieldDescriptionProvider(provider);
+		if (accessibleContext != null) {
+			((AccessibleFieldPanel) accessibleContext).setFieldDescriptionProvider(provider);
 		}
 	}
 
@@ -1121,8 +1121,8 @@ public class FieldPanel extends JPanel
 	}
 
 	private void notifyScrollListenerViewChangedAndRepaint() {
-		if (accessibleFieldPanel != null) {
-			accessibleFieldPanel.updateLayouts();
+		if (accessibleContext != null) {
+			((AccessibleFieldPanel) accessibleContext).updateLayouts();
 		}
 		BigInteger startIndex = BigInteger.ZERO;
 		BigInteger endIndex = startIndex;
@@ -1349,8 +1349,8 @@ public class FieldPanel extends JPanel
 		for (FieldSelectionListener l : selectionListeners) {
 			l.selectionChanged(currentSelection, trigger);
 		}
-		if (accessibleFieldPanel != null) {
-			accessibleFieldPanel.selectionChanged(currentSelection, trigger);
+		if (accessibleContext != null) {
+			((AccessibleFieldPanel) accessibleContext).selectionChanged(currentSelection, trigger);
 		}
 
 	}
@@ -1378,13 +1378,14 @@ public class FieldPanel extends JPanel
 
 	@Override
 	public AccessibleContext getAccessibleContext() {
-		if (accessibleFieldPanel == null) {
-			accessibleFieldPanel = new AccessibleFieldPanel();
+		if (accessibleContext == null) {
+			accessibleContext = new AccessibleFieldPanel();
 			if (fieldDescriptionProvider != null) {
-				accessibleFieldPanel.setFieldDescriptionProvider(fieldDescriptionProvider);
+				((AccessibleFieldPanel) accessibleContext)
+						.setFieldDescriptionProvider(fieldDescriptionProvider);
 			}
 		}
-		return accessibleFieldPanel;
+		return accessibleContext;
 	}
 
 //==================================================================================================
@@ -1393,7 +1394,8 @@ public class FieldPanel extends JPanel
 	// We are forced to declare this as an inner class because AccessibleJComponent is a 
 	// non-static inner class. So this is just a stub and defers all its logic to
 	// the AccessibleFieldPanelDelegate.
-	class AccessibleFieldPanel extends AccessibleJComponent implements AccessibleText {
+	class AccessibleFieldPanel extends AccessibleJComponent
+			implements AccessibleText, AccessibleEditableText {
 		private AccessibleFieldPanelDelegate delegate;
 
 		AccessibleFieldPanel() {
@@ -1424,6 +1426,11 @@ public class FieldPanel extends JPanel
 
 		@Override
 		public AccessibleText getAccessibleText() {
+			return this;
+		}
+
+		@Override
+		public AccessibleEditableText getAccessibleEditableText() {
 			return this;
 		}
 
@@ -1515,6 +1522,60 @@ public class FieldPanel extends JPanel
 		@Override
 		public String getSelectedText() {
 			return delegate.getSelectedText();
+		}
+
+		@Override
+		public void setTextContents(String s) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void insertTextAtIndex(int index, String s) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public String getTextRange(int startIndex, int endIndex) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public void delete(int startIndex, int endIndex) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void cut(int startIndex, int endIndex) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void paste(int startIndex) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void replaceText(int startIndex, int endIndex, String s) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void selectText(int startIndex, int endIndex) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void setAttributes(int startIndex, int endIndex, AttributeSet as) {
+			// TODO Auto-generated method stub
+
 		}
 
 	}
@@ -2427,8 +2488,8 @@ public class FieldPanel extends JPanel
 			}
 
 			FieldLocation currentLocation = new FieldLocation(cursorPosition);
-			if (accessibleFieldPanel != null) {
-				accessibleFieldPanel.cursorChanged(currentLocation, trigger);
+			if (accessibleContext != null) {
+				((AccessibleFieldPanel) accessibleContext).cursorChanged(currentLocation, trigger);
 			}
 			for (FieldLocationListener l : cursorListeners) {
 				l.fieldLocationChanged(currentLocation, currentField, trigger);
